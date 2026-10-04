@@ -1,0 +1,30 @@
+name: mirror
+
+on:
+  push:
+    branches: [main]
+    paths: [images.txt, .github/workflows/mirror.yml]
+  schedule:
+    - cron: "0 3 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  mirror:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: imjasonh/setup-crane@v0.4
+      - run: crane auth login ghcr.io -u "${{ github.actor }}" -p "${{ secrets.GITHUB_TOKEN }}"
+      - name: Copy images
+        run: |
+          grep -vE '^\s*(#|$)' images.txt | while read -r src; do
+            name="${src##*/}"   # external-dns:v0.23.0
+            dst="ghcr.io/gl-game-group/mirror/${name}"
+            echo "::group::${src} -> ${dst}"
+            crane copy --platform all "${src}" "${dst}"
+            echo "::endgroup::"
+          done

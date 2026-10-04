@@ -1,0 +1,3 @@
+# source image                                       -> ghcr.io/gl-game-group/mirror/<name>:<tag>
+# Images the office network cannot pull (registry.k8s.io, docker.io). One per line.
+registry.k8s.io/external-dns/external-dns:v0.23.0
